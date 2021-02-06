@@ -12,9 +12,10 @@ import busio
 import adafruit_bmp280
 
 SERVO_PIN = 13
-PARACHUTE_DEPLOY = 1500
+PARACHUTE_DEPLOY = 0
 PARACHUTE_RESET = 500
 
+DROP_AFTER_APOGEE = 1.0
 
 from paho.mqtt import client as mqtt_client
 
@@ -31,8 +32,6 @@ def on_message(client, rocket, msg):
             rocket.parachute_reset()
     elif msg.topic == "/rocket/parachute/auto":
         rocket.set_parachute_auto(int(payload))
-    elif msg.topic == "/rocket/parachute/height":
-        rocket.set_parachute_height(float(payload))
 
 class Rocket(object):
 
@@ -60,7 +59,6 @@ class Rocket(object):
         self.client.subscribe("/rocket/telemetry/reset")
         self.client.subscribe("/rocket/telemetry/record")
 
-        self.client.subscribe("/rocket/parachute/height")
         self.client.subscribe("/rocket/parachute/deploy")
         self.client.subscribe("/rocket/parachute/auto")
         self.client.subscribe("/rocket/parachute/reset")
@@ -94,7 +92,6 @@ class Rocket(object):
         self.set_parachute_auto(True)
         self.client.publish("/rocket/parachute/deploy", "0")
         self.client.publish("/rocket/parachute/auto", "1")
-        self.client.publish("/rocket/parachute/height", str(self.parachute_height))
         self.client.publish("/rocket/telemetry/record", "0")
         logging.info("Reset Parachute")
 
@@ -122,10 +119,6 @@ class Rocket(object):
             logging.info("Parachute deploy set to auto")
         else:
             logging.info("Parachute deploy set to manual")
-
-    def set_parachute_height(self, height):
-        self.parachute_height = height
-        logging.info(f"Set parachute deploy height to {self.parachute_height}")
 
     def parachute_reset(self):
         logging.info(f"Reset parachute")
@@ -161,8 +154,7 @@ class Rocket(object):
                 # auto parachute deploy
                 if self.parachute_autodeploy \
                 and not self.parachute_deployed \
-                and (self.max_altitude - self.altitude) > 1.0 \
-                and self.altitude < self.parachute_height:
+                and (self.max_altitude - self.altitude) > DROP_AFTER_APOGEE:
                     self.parachute_deploy()
                     logging.info(f"auto deploying parachute at height {self.altitude}")
 
