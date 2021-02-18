@@ -12,7 +12,7 @@ https://core-electronics.com.au/tutorials/raspberry-pi-zerow-headless-wifi-setup
 
 Update Raspberry Pi OS by running:
 
-sudo apt-get update && sudo apt-get upgrade
+  sudo apt update && sudo apt upgrade
 
 # Networking
 
@@ -26,28 +26,62 @@ https://www.raspberryconnect.com/projects/65-raspberrypi-hotspot-accesspoints/15
 
 Networking is hard! You will definitly need to re-image your SD card multiple times!
 
-## Apt Requirements
+# Development
+
+Install Python 3 so that we can run Python code
+
+  sudo apt install python3 python3-pip
+
+It's also a good idea to install git to that we can clone / save code to github
+
+  sudo apt install git
+
+# Communicating with the Android app
+
+Install the Mosquitto MQQT server so that we can easily communicate with our dashboard
+
+  sudo apt install mosquitto mosquitto-clients
 
 https://pimylifeup.com/raspberry-pi-mosquitto-mqtt-server/
 
-mosquitto
-mosquitto-clients
+We can then enable Mosquitto on startup using:
 
-python3
-python3-pip
+  sudo systemctl enable mosquitto
 
-https://gpiozero.readthedocs.io/en/stable/remote_gpio.html
+The Android app I am using is Dash MQQT https://play.google.com/store/apps/details?id=net.routix.mqttdash&hl=en_US&gl=US
 
-pigpio
+We then install the Python library to send and recieve MQQT topic data
 
-## Python Requirements
+  sudo pip install paho-mqtt
+  
+There is some general information on using MQQT from Python here:
 
 http://www.steves-internet-guide.com/mqtt-python-beginners-course/
 
-paho-mqtt
-
-gpiozero
-pigpio
+# Reading Altitude
 
 
 
+# Driving servos
+
+The servos are driven by PiGPIO. We use a Python library to talk to a daemon - which actually sends the PWM signals to the servo. The Raspberry Pi Zero W has 2 hardware PWM channels. Use one of these if you can as software can have timing issues.
+
+https://gpiozero.readthedocs.io/en/stable/remote_gpio.html
+
+  sudo apt install pigpio
+
+And enable it to run at boot:
+
+  sudo systemctl enable pigpiod
+
+Note that Remote GPIO needs to be enabled by running:
+
+  sudo raspi-config
+  
+Then choosing option:
+
+3 Interface Options > P8 Remote GPIO
+
+The Python library can be istalled with
+
+  sudo pip3 install pigpio
