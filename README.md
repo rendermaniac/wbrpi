@@ -12,7 +12,7 @@ https://core-electronics.com.au/tutorials/raspberry-pi-zerow-headless-wifi-setup
 
 Update Raspberry Pi OS by running:
 
-  sudo apt update && sudo apt upgrade
+`sudo apt update && sudo apt upgrade`
 
 # Networking
 
@@ -30,29 +30,29 @@ Networking is hard! You will definitly need to re-image your SD card multiple ti
 
 Install Python 3 so that we can run Python code
 
-  sudo apt install python3 python3-pip
+`sudo apt install python3 python3-pip`
 
 It's also a good idea to install git to that we can clone / save code to github
 
-  sudo apt install git
+`sudo apt install git`
 
 # Communicating with the Android app
 
 Install the Mosquitto MQQT server so that we can easily communicate with our dashboard
 
-  sudo apt install mosquitto mosquitto-clients
+`sudo apt install mosquitto mosquitto-clients`
 
 https://pimylifeup.com/raspberry-pi-mosquitto-mqtt-server/
 
 We can then enable Mosquitto on startup using:
 
-  sudo systemctl enable mosquitto
+`sudo systemctl enable mosquitto`
 
 The Android app I am using is Dash MQQT https://play.google.com/store/apps/details?id=net.routix.mqttdash&hl=en_US&gl=US
 
 We then install the Python library to send and recieve MQQT topic data
 
-  sudo pip install paho-mqtt
+`sudo pip3 install paho-mqtt`
   
 There is some general information on using MQQT from Python here:
 
@@ -68,20 +68,20 @@ The servos are driven by PiGPIO. We use a Python library to talk to a daemon - w
 
 https://gpiozero.readthedocs.io/en/stable/remote_gpio.html
 
-  sudo apt install pigpio
+`sudo apt install pigpio`
 
 And enable it to run at boot:
 
-  sudo systemctl enable pigpiod
+`sudo systemctl enable pigpiod`
 
 Note that Remote GPIO needs to be enabled by running:
 
-  sudo raspi-config
+`sudo raspi-config`
   
 Then choosing option:
 
-3 Interface Options > P8 Remote GPIO
+`3 Interface Options > P8 Remote GPIO`
 
 The Python library can be istalled with
 
-  sudo pip3 install pigpio
+`sudo pip3 install pigpio`
