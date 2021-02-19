@@ -16,7 +16,7 @@ SERVO_PIN = 13
 PARACHUTE_DEPLOY = 1500
 PARACHUTE_RESET = 500
 
-DROP_AFTER_APOGEE = 1.0
+DROP_AFTER_APOGEE = 5.0
 
 from paho.mqtt import client as mqtt_client
 
