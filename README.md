@@ -106,4 +106,4 @@ Download the flight computer script from github:
 
 `git clone https://github.com/rendermaniac/wbrpi`
 
-The easiest way to get it to run on startup is to add it to the /etc/rc.local file. I may looking into a fancy systemctl way of doing this in the future as rc.local is being depreciated. Note that anything in rc.local will get run as root.
+The easiest way to get it to run on startup is to add it to the /etc/rc.local file before `exit 0`. I may looking into a fancy systemctl way of doing this in the future as rc.local is being depreciated. Note that anything in rc.local will get run as root.
