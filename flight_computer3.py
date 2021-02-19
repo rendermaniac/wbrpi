@@ -1,3 +1,4 @@
+import os
 import math
 import time
 import logging
@@ -23,6 +24,8 @@ def on_message(client, rocket, msg):
     payload = msg.payload.decode()
     if msg.topic == "/rocket/telemetry/reset":
         rocket.reset()
+    elif msg.topic == "/rocket/telemetry/notes":
+        rocket.setNotes(payload)
     elif msg.topic == "/rocket/telemetry/record":
         rocket.record(int(payload))
     elif msg.topic == "/rocket/parachute/deploy":
@@ -51,6 +54,7 @@ class Rocket(object):
         self.parachute_height = 15.0
         self.parachute_autodeploy = True
 
+        self.notes = None
         self.csvfile = None
 
         self.client = mqtt_client.Client("flight_computer", userdata=self)
@@ -58,6 +62,7 @@ class Rocket(object):
 
         self.client.subscribe("/rocket/telemetry/reset")
         self.client.subscribe("/rocket/telemetry/record")
+        self.client.subscribe("/rocket/telemetry/notes")
 
         self.client.subscribe("/rocket/parachute/deploy")
         self.client.subscribe("/rocket/parachute/auto")
@@ -76,6 +81,7 @@ class Rocket(object):
         logging.info("Running flight computer")
 
     def reset(self):
+        #os.system("sudo /etc/init.d/cron start")
         self.altitude = 0.0
         self.max_altitude = 0.0
         self.bmp280.sea_level_pressure = self.bmp280.pressure
@@ -91,18 +97,27 @@ class Rocket(object):
         self.parachute_reset()
         self.set_parachute_auto(True)
         self.client.publish("/rocket/parachute/deploy", "0")
-        self.client.publish("/rocket/parachute/auto", "1")
+        # self.client.publish("/rocket/parachute/auto", "1")
         self.client.publish("/rocket/telemetry/record", "0")
         logging.info("Reset Parachute")
+
+    def setNotes(self, notes):
+        self.notes = notes
+        logging.info(f"Set notes: {self.notes}")
 
     def record(self, state):
         self.recording = bool(state)
         if self.recording:
+            #os.system("sudo /etc/init.d/cron stop")
             if self.csvfile:
                 self.csvfile.close()
             today = datetime.now().strftime("%Y_%m_%d_%H_%M")
             self.csvfile = open(f"/home/pi/{today}.csv", "w")
-            self.csvfile.write(f"time,altitude,deploy\n") # header
+
+            if self.notes:
+                self.csvfile.write(f"{self.notes}\n")
+
+            self.csvfile.write("time,altitude,deploy\n") # header
             
         logging.info(f"Set recording to {self.recording}")
 

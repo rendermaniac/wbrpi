@@ -12,3 +12,6 @@ sudo pip3 install paho-mqtt pigpio adafruit-circuitpython-bmp280
 # enable services on startup
 sudo systemctl enable mosquitto
 sudo systemctl enable pigpiod
+
+wget https://raw.githubusercontent.com/rendermaniac/wbrpi/main/flight_computer3.py
+sudo mv flight_computer3.py /usr/bin
