@@ -88,6 +88,14 @@ The Python library can be istalled with
 
 `sudo pip3 install pigpio`
 
-# Quick install
+# Quick Dependency install
 
 `sudo apt install python3 python3-pip git mosquitto mosquitto-clients pigpio -y -qq && sudo pip3 install paho-mqtt pigpio adafruit-circuitpython-bmp280`
+
+# Get the flight software
+
+Download the flight computer script from github:
+
+`git clone https://github.com/rendermaniac/wbrpi`
+
+The easiest way to get it to run on startup is to add it to the /etc/rc.local file. I may looking into a fancy systemctl way of doing this in the future as rc.local is being depreciated. Note that anything in rc.local will get run as root.
