@@ -60,7 +60,13 @@ http://www.steves-internet-guide.com/mqtt-python-beginners-course/
 
 # Reading Altitude
 
+Firstly we need to follow this guide to install Adafruit CircuitPython with Blinka (the Micropython compatibility layer for Linux)
 
+https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi
+
+Then we need to install the driver for the BMP280 pressure sensor:
+
+`sudo pip3 install adafruit-circuitpython-bmp280`
 
 # Driving servos
 
@@ -85,3 +91,7 @@ Then choosing option:
 The Python library can be istalled with
 
 `sudo pip3 install pigpio`
+
+# Quick install
+
+`sudo apt install python3 python3-pip git mosquitto mosquitto-clients pigpio -y -qq && sudo pip3 install paho-mqtt pigpio adafruit-circuitpython-bmp280`
