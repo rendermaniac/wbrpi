@@ -1,5 +1,3 @@
-# Raspberry Pi based flight logging software
-
 # Raspberry Pi setup
 
 Install Raspberry Pi Lite using the Pi Imager tool:
@@ -62,9 +60,7 @@ http://www.steves-internet-guide.com/mqtt-python-beginners-course/
 
 Firstly we need to follow this guide to install Adafruit CircuitPython with Blinka (the Micropython compatibility layer for Linux)
 
-https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi
-
-Then we need to install the driver for the BMP280 pressure sensor:
+Luckily if we install the BMP280 pressure sensor driver using pip3, it will install all the requirements for us:
 
 `sudo pip3 install adafruit-circuitpython-bmp280`
 
