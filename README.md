@@ -20,7 +20,7 @@ https://gist.github.com/gbaman/975e2db164b3ca2b51ae11e45e8fd40a
 
 Setting up switching to a hotspot when out of network range. Note that the auto install script seemed to have trouble picking up AU as a country code. I also change the IP address to the same as the network so that I do not need to change between them in tools. Also this appears to disable OTG connection:
 
-https://www.raspberryconnect.com/projects/65-raspberrypi-hotspot-accesspoints/158-raspberry-pi-auto-wifi-hotspot-switch-direct-connection
+https://www.raspberryconnect.com/projects/65-raspberrypi-hotspot-accesspoints/183-raspberry-pi-automatic-hotspot-and-static-hotspot-installer
 
 Networking is hard! You will definitly need to re-image your SD card multiple times!
 
