@@ -22,7 +22,13 @@ Setting up switching to a hotspot when out of network range. Note that the auto 
 
 https://www.raspberryconnect.com/projects/65-raspberrypi-hotspot-accesspoints/183-raspberry-pi-automatic-hotspot-and-static-hotspot-installer
 
-Networking is hard! You will definitly need to re-image your SD card multiple times!
+From the installer choose option 2 to allow auto hotspot switching without internet on the device. The Wifi device on the Raspberry Pi Zero W can bridge a wifi network so you can have internet. However it gets really confused when the Wifi network isn't there and performance drops off to a crawl.
+
+I set up the hotspot IP address to be the same as the static IP on my local network. This should give a seamless transition 
+
+Networking is hard! You will definitly need to re-image your SD card multiple times! I have been using win32 Disk Imager to backup the SD card so I can go back to a known good state:
+
+https://sourceforge.net/projects/win32diskimager/
 
 # Development
 
