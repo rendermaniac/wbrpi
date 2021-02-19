@@ -12,7 +12,7 @@ import busio
 import adafruit_bmp280
 
 SERVO_PIN = 13
-PARACHUTE_DEPLOY = 0
+PARACHUTE_DEPLOY = 1500
 PARACHUTE_RESET = 500
 
 DROP_AFTER_APOGEE = 1.0
@@ -101,7 +101,7 @@ class Rocket(object):
             if self.csvfile:
                 self.csvfile.close()
             today = datetime.now().strftime("%Y_%m_%d_%H_%M")
-            self.csvfile = open(f"{today}.csv", "w")
+            self.csvfile = open(f"/home/pi/{today}.csv", "w")
             self.csvfile.write(f"time,altitude,deploy\n") # header
             
         logging.info(f"Set recording to {self.recording}")
