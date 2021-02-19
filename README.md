@@ -64,6 +64,14 @@ Luckily if we install the BMP280 pressure sensor driver using pip3, it will inst
 
 `sudo pip3 install adafruit-circuitpython-bmp280`
 
+Note that IC2 needs to be enabled by running:
+
+`sudo raspi-config`
+  
+Then choosing option:
+
+`3 Interface Options > P5 IC2`
+
 # Driving servos
 
 The servos are driven by PiGPIO. We use a Python library to talk to a daemon - which actually sends the PWM signals to the servo. The Raspberry Pi Zero W has 2 hardware PWM channels. Use one of these if you can as software can have timing issues.
@@ -88,6 +96,14 @@ The Python library can be istalled with
 
 `sudo pip3 install pigpio`
 
-# Quick install
+# Quick Dependency install
 
 `sudo apt install python3 python3-pip git mosquitto mosquitto-clients pigpio -y -qq && sudo pip3 install paho-mqtt pigpio adafruit-circuitpython-bmp280`
+
+# Get the flight software
+
+Download the flight computer script from github:
+
+`git clone https://github.com/rendermaniac/wbrpi`
+
+The easiest way to get it to run on startup is to add it to the /etc/rc.local file. I may looking into a fancy systemctl way of doing this in the future as rc.local is being depreciated. Note that anything in rc.local will get run as root.
