@@ -81,7 +81,6 @@ class Rocket(object):
         logging.info("Running flight computer")
 
     def reset(self):
-        #os.system("sudo /etc/init.d/cron start")
         self.altitude = 0.0
         self.max_altitude = 0.0
         self.bmp280.sea_level_pressure = self.bmp280.pressure
@@ -108,7 +107,6 @@ class Rocket(object):
     def record(self, state):
         self.recording = bool(state)
         if self.recording:
-            #os.system("sudo /etc/init.d/cron stop")
             if self.csvfile:
                 self.csvfile.close()
             today = datetime.now().strftime("%Y_%m_%d_%H_%M")
