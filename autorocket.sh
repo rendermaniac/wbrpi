@@ -20,7 +20,7 @@ sudo raspi-config nonint do_i2c 0
 sudo curl https://raw.githubusercontent.com/rendermaniac/wbrpi/main/flight_computer3.py -o /usr/bin/flight_computer3.py
 
 # add flight_computer3.py to /etc/rc.local just before exit 0 command
-sudo sed -i.bak -e '$ipython3 \/usr\/bin\/flight_computer.py' /etc/rc.local
+sudo sed -i.bak -e '$ipython3 \/usr\/bin\/flight_computer3.py&' /etc/rc.local
 
 # download autohotspot
 curl "https://www.raspberryconnect.com/images/hsinstaller/AutoHotspot-Setup.tar.gz" -o AutoHotspot-Setup.tar.gz
