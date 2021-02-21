@@ -102,9 +102,16 @@ The Python library can be istalled with
 
 `sudo pip3 install pigpio`
 
-# Quick Dependency install
+# Quick install
 
-`sudo apt install python3 python3-pip git mosquitto mosquitto-clients pigpio -y -qq && sudo pip3 install paho-mqtt pigpio adafruit-circuitpython-bmp280`
+Most of these operations can be automated by running these commands on a fresh Raspberry Pi OS install:
+
+```
+ curl https://raw.githubusercontent.com/rendermaniac/wbrpi/main/autorocket.sh -o autorocket.sh
+ ./autorocket.sh
+```
+
+Note that this has no checks, backups or any way to restore the previous state. Only run on a Raspberry Pi install you really don't care about! I have only tested this on my machine.
 
 # Get the flight software
 
