@@ -102,6 +102,14 @@ The Python library can be istalled with
 
 `sudo pip3 install pigpio`
 
+# Get the flight software
+
+Download the flight computer script from github:
+
+`git clone https://github.com/rendermaniac/wbrpi`
+
+The easiest way to get it to run on startup is to add it to the /etc/rc.local file before `exit 0`. I may looking into a fancy systemctl way of doing this in the future as rc.local is being depreciated. Note that anything in rc.local will get run as root.
+
 # Quick install
 
 Most of these operations can be automated by running these commands on a fresh Raspberry Pi OS install:
@@ -112,11 +120,3 @@ Most of these operations can be automated by running these commands on a fresh R
 ```
 
 Note that this has no checks, backups or any way to restore the previous state. Only run on a Raspberry Pi install you really don't care about! I have only tested this on my machine.
-
-# Get the flight software
-
-Download the flight computer script from github:
-
-`git clone https://github.com/rendermaniac/wbrpi`
-
-The easiest way to get it to run on startup is to add it to the /etc/rc.local file before `exit 0`. I may looking into a fancy systemctl way of doing this in the future as rc.local is being depreciated. Note that anything in rc.local will get run as root.
