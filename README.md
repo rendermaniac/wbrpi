@@ -110,6 +110,16 @@ Download the flight computer script from github:
 
 The easiest way to get it to run on startup is to add it to the /etc/rc.local file before `exit 0`. I may looking into a fancy systemctl way of doing this in the future as rc.local is being depreciated. Note that anything in rc.local will get run as root.
 
+# Reporting
+
+Install InfluxDB
+
+https://pimylifeup.com/raspberry-pi-influxdb/
+
+Setup InfluxDB with Python
+
+https://diyi0t.com/visualize-mqtt-data-with-influxdb-and-grafana/
+
 # Quick install
 
 Most of these operations can be automated by running these commands on a fresh Raspberry Pi OS install:
