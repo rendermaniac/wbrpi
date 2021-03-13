@@ -3,7 +3,7 @@
 # Autohotspot needs to be installed with the interactive installer
 
 # install apt dependencies
-sudo apt install python3 python3-pip git mosquitto mosquitto-clients pigpio python3-picamera -y -qq
+sudo apt install python3 python3-pip git mosquitto mosquitto-clients pigpio python3-picamera python3-matplotlib -y -qq
 
 # install python3 dependencies
 sudo pip3 install paho-mqtt pigpio adafruit-circuitpython-bmp280

@@ -1,4 +1,5 @@
 import os
+import os.path
 import math
 import time
 import logging
@@ -13,6 +14,8 @@ import busio
 import adafruit_bmp280
 
 import picamera
+
+from matplotlib import pyplot as plt
 
 SERVO_PIN = 13
 PARACHUTE_DEPLOY = 1500
@@ -47,6 +50,8 @@ class Rocket(object):
     def __init__(self, simulate=None):     
         self.altitude = 0.0
         self.max_altitude = 0.0
+        self.altitudes = []
+        self.parachute_deploys = []
         self.camera_record = False
         self.recording = False
         self.record_reset = False
@@ -101,6 +106,8 @@ class Rocket(object):
     def reset_data(self):
         self.altitude = 0.0
         self.max_altitude = 0.0
+        self.altitudes = []
+        self.parachute_deploys = []
         self.bmp280.sea_level_pressure = self.bmp280.pressure
 
     def reset(self):
@@ -145,6 +152,23 @@ class Rocket(object):
                 if self.camera.recording:
                     self.camera.stop_recording()
 
+            # cleanup
+            apogee_file = f"{TELEMETRY_PATH}{self.filename}.jpg"
+            if os.path.exists(apogee_file):
+                f = open(apogee_file, "rb")
+                apogee_data = f.read()
+                self.client.publish("/rocket/camera/apogee", bytearray(apogee_data))
+
+            plot_file = f"{TELEMETRY_PATH}{self.filename}.png"
+            plt.plot(self.altitudes, label="Altitude")
+            plt.plot(self.parachute_deploys, label="Parachute Deploy")
+            plt.title("Pi High Rockets")
+            plt.savefig(plot_file)
+
+            f = open(plot_file, "rb")
+            plot_data = f.read()
+            self.client.publish("/rocket/telemetry/plot", bytearray(plot_data))
+
         logging.info(f"Set recording to {self.recording}")
 
     def parachute_deploy(self):
@@ -178,7 +202,7 @@ class Rocket(object):
                 now = datetime.timestamp(datetime.now())
 
                 # Simulate altititude
-
+                # TODO switch to using the csv library
                 if self.simulate:
                     line = self.simulate.readline()
                     if line and line != "\n":
@@ -192,8 +216,11 @@ class Rocket(object):
                         self.simulate.seek(0) # reset to start of simulation file
                         self.simulate.readline() # ignore headers
 
-                self.csvfile.write(f"{now},{self.altitude},{int(self.parachute_deployed)}\n")
-                self.csvfile.flush()
+                if not self.csvfile.closed:
+                    self.csvfile.write(f"{now},{self.altitude},{int(self.parachute_deployed)}\n")
+                    self.csvfile.flush()
+                    self.altitudes.append(self.altitude)
+                    self.parachute_deploys.append(self.parachute_deployed)
                 
                 # auto parachute deploy
                 if self.parachute_autodeploy \
