@@ -35,6 +35,11 @@ def on_message(client, rocket, msg):
         rocket.set_notes(payload)
     elif msg.topic == "/rocket/camera/enable":
         rocket.enable_camera(int(payload))
+    elif msg.topic == "/rocket/camera/options":
+        if payload == "hd":
+            rocket.set_camera_hd()
+        elif payload == "slowmo":
+            rocket.set_camera_slow_motion()
     elif msg.topic == "/rocket/telemetry/record":
         rocket.record(int(payload))
     elif msg.topic == "/rocket/parachute/deploy":
@@ -78,6 +83,7 @@ class Rocket(object):
         self.client.subscribe("/rocket/telemetry/notes")
 
         self.client.subscribe("/rocket/camera/enable")
+        self.client.subscribe("/rocket/camera/options")
 
         self.client.subscribe("/rocket/parachute/deploy")
         self.client.subscribe("/rocket/parachute/auto")
@@ -93,8 +99,8 @@ class Rocket(object):
         self.pi.set_servo_pulsewidth(SERVO_PIN, PARACHUTE_RESET)
 
         self.camera = picamera.PiCamera()
-        self.camera.resolution = (1920, 1080) # full HD
-        self.camera.framerate = 30
+        self.set_camera_hd()
+        self.client.publish("/rocket/camera/options", "hd")
 
         self.reset()
 
@@ -129,6 +135,16 @@ class Rocket(object):
     def enable_camera(self, enable):
         self.camera_record = enable
         logging.info(f"Camera recording: {self.camera_record}")
+
+    def set_camera_hd(self):
+        self.camera.resolution = (1920, 1080)
+        self.camera.framerate = 30
+        logging.info(f"Camera set to HD")
+
+    def set_camera_slow_motion(self):
+        self.camera.resolution = (640, 480)
+        self.camera.framerate = 90
+        logging.info(f"Camera set to slow motion")
 
     def record(self, state):
         self.recording = bool(state)
