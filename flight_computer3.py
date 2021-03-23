@@ -6,6 +6,7 @@ import logging
 
 import argparse
 from datetime import datetime
+import csv
 
 import pigpio
 
@@ -14,6 +15,7 @@ import busio
 import adafruit_bmp280
 
 import picamera
+import psutil
 
 from matplotlib import pyplot as plt
 
@@ -55,6 +57,11 @@ class Rocket(object):
     def __init__(self, simulate=None):     
         self.altitude = 0.0
         self.max_altitude = 0.0
+        self.temperature = 0.0
+        self.pressure = 0.0
+        self.cpu = 0.0
+        self.memory = 0.0
+
         self.altitudes = []
         self.parachute_deploys = []
         self.camera_record = False
@@ -63,8 +70,8 @@ class Rocket(object):
 
         self.simulate = None
         if simulate:
-            self.simulate = open(simulate, "r")
-            self.simulate.readline() # ignore headers
+            self.simulate = open(simulate, "r", newline="")
+            self.simdata = csv.DictReader(self.simulate)
             logging.warning("SIMULATION MODE")
 
         self.parachute_deployed = False
@@ -74,6 +81,7 @@ class Rocket(object):
         self.filename = None
         self.notes = None
         self.csvfile = None
+        self.data = None
 
         self.client = mqtt_client.Client("flight_computer", userdata=self)
         self.client.connect("127.0.0.1", 1883)
@@ -102,6 +110,8 @@ class Rocket(object):
         self.set_camera_hd()
         self.client.publish("/rocket/camera/options", "hd")
 
+        # self test and running indicator
+        self.parachute_deploy()
         self.reset()
 
         self.client.publish("/rocket/parachute/auto", "1")
@@ -151,12 +161,16 @@ class Rocket(object):
         if self.recording:
             self.reset_data()
             self.filename = datetime.now().strftime("%Y_%m_%d_%H_%M")
-            self.csvfile = open(f"{TELEMETRY_PATH}{self.filename}.csv", "w")
+            self.csvfile = open(f"{TELEMETRY_PATH}{self.filename}.csv", "w", newline="")
+            
+            fieldnames = ["time", "altitude", "deployed", "temperature", "pressure", "cpu", "memory"]
+            self.data = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
+            self.data.writeheader()
 
             if self.notes:
-                self.csvfile.write(f"{self.notes}\n")
-
-            self.csvfile.write("time,altitude,deploy\n") # header
+                notes = open(f"{TELEMETRY_PATH}{self.filename}.notes", "w")
+                notes.write(f"{self.notes}\n")
+                notes.close()
 
             if self.camera_record:
                 self.camera.start_recording(f"{TELEMETRY_PATH}{self.filename}.h264")        
@@ -211,6 +225,11 @@ class Rocket(object):
         while True:
 
             self.altitude = self.bmp280.altitude
+            self.temperature = self.bmp280.temperature
+            self.pressure = self.bmp280.pressure
+
+            self.cpu = psutil.cpu_percent()
+            self.memory = psutil.virtual_memory().percent
 
             if self.recording:
                 
@@ -218,23 +237,32 @@ class Rocket(object):
                 now = datetime.timestamp(datetime.now())
 
                 # Simulate altititude
-                # TODO switch to using the csv library
                 if self.simulate:
-                    line = self.simulate.readline()
-                    if line and line != "\n":
-                        simdata = line.split(",")
-                        if simdata:
-                            self.altitude = float(simdata[1])
-                            #self.parachute_deployed = float(simdata[2])
+                    
+                    try:
+                        row = next(self.simdata)
+                        self.altitude = float(row["altitude"])
                         logging.info(f"Simulated")
-                    else:
+                    except StopIteration:
                         logging.info(f"End of simulation file")
-                        self.simulate.seek(0) # reset to start of simulation file
-                        self.simulate.readline() # ignore headers
+                        self.simulate.seek(0)
+                        self.simdata = csv.DictReader(self.simulate)
 
                 if not self.csvfile.closed:
-                    self.csvfile.write(f"{now},{self.altitude},{int(self.parachute_deployed)}\n")
+                    
+                    rowdata = {}
+                    rowdata["time"] = now
+                    rowdata["altitude"] = self.altitude
+                    rowdata["deployed"] = int(self.parachute_deployed)
+                    rowdata["temperature"] = self.temperature
+                    rowdata["pressure"] = self.pressure
+                    rowdata["cpu"] = self.cpu
+                    rowdata["memory"] = self.memory
+
+                    self.data.writerow(rowdata)
                     self.csvfile.flush()
+
+                    # for preview plot data
                     self.altitudes.append(self.altitude)
                     self.parachute_deploys.append(self.parachute_deployed)
                 
