@@ -45,9 +45,9 @@ def on_message(client, rocket, msg):
     elif msg.topic == "/rocket/telemetry/record":
         rocket.record(int(payload))
     elif msg.topic == "/rocket/parachute/deploy":
-        if payload == "1":
+        if payload == "1" and rocket.parachute_deployed == False:
             rocket.parachute_deploy()
-        else:
+        elif payload == "0" and rocket.parachute_deployed == True:
             rocket.parachute_reset()
     elif msg.topic == "/rocket/parachute/auto":
         rocket.set_parachute_auto(int(payload))
@@ -135,7 +135,6 @@ class Rocket(object):
         logging.info("Reset Altitude")
 
         self.parachute_reset()
-        self.client.publish("/rocket/telemetry/record", "0")
         logging.info("Reset Parachute")
 
     def set_notes(self, notes):
@@ -219,6 +218,7 @@ class Rocket(object):
         logging.info(f"Reset parachute")
         self.pi.set_servo_pulsewidth(SERVO_PIN, PARACHUTE_RESET)
         self.parachute_deployed = False
+        self.client.publish("/rocket/parachute/deploy", "0")
 
     def run(self):
 
@@ -267,9 +267,9 @@ class Rocket(object):
                     self.parachute_deploys.append(self.parachute_deployed)
                 
                 # auto parachute deploy
-                if self.parachute_autodeploy \
-                and not self.parachute_deployed \
-                and (self.max_altitude - self.altitude) > DROP_AFTER_APOGEE:
+                altitude_diff = self.max_altitude - self.altitude
+                logging.info("ALT DIFF!!!!!!!! {}".format(altitude_diff))
+                if self.parachute_autodeploy and not self.parachute_deployed and (altitude_diff > DROP_AFTER_APOGEE):
                     self.parachute_deploy()
 
                     # take photo at apogee
@@ -282,7 +282,7 @@ class Rocket(object):
             else:
                 delay = 1.0
 
-            logging.info(f"Reading altitude {self.altitude}")
+            logging.info(f"Reading altitude {self.altitude} max altitude: {self.max_altitude}")
             self.client.publish("/rocket/telemetry/altitude", self.altitude)
 
             if self.altitude > self.max_altitude:
