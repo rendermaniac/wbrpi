@@ -41,7 +41,7 @@ class Rocket(object):
         self.sensor = Sensor(simulate)
         self.state = State(self.sensor)
         self.parachute = Parachute(self.state)
-        self.recorder = Recorder(self.sensor, self.parachute)
+        self.recorder = Recorder([self.sensor, self.parachute])
 
         self.delay = 1.0
 

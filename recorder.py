@@ -2,6 +2,7 @@ import os
 import logging
 from datetime import datetime
 import csv
+from collections import defaultdict
 
 import picamera
 from matplotlib import pyplot as plt
@@ -10,7 +11,7 @@ class Recorder(object):
 
     HD_FRAMERATE = 30.0
 
-    def __init__(self, sensor, parachute):
+    def __init__(self, datasources):
         self.recording = False
         self.camera_record = False
         
@@ -19,25 +20,25 @@ class Recorder(object):
         self.notes = None
         self.csv = None
 
-        self.sensor = sensor
-        self.parachute = parachute
-
+        self.datasources = datasources
         self.reset()
 
         self.camera = picamera.PiCamera()
         self.framerate_factor = 1.0
         self.set_camera_hd()
         
-        telemetry_dir = datetime.now().strftime('%Y_%m_%d')
-        os.mkdir(telemetry_dir)
-        self.TELEMETRY_PATH = f"/home/pi/{telemetry_dir}/"
+        self.TELEMETRY_PATH = f"/home/pi/{datetime.now().strftime('%Y_%m_%d')}/"
+        if not os.path.exists(self.TELEMETRY_PATH):
+            os.mkdir(self.TELEMETRY_PATH)
+
         self.csvfile = None
+        self.csvhandle = None
         self.apogee_file = None
         self.plot_file = None
 
+        self.plot_fields = ["altitude", "deployed"]
+
     def reset(self):
-        self.altitudes = []
-        self.parachute_deploys = []
         self.apogee_photographed = False
         self.starttime = datetime.now()
 
@@ -69,23 +70,23 @@ class Recorder(object):
 
     def start_recording(self):
         self.recording = True
-        self.sensor.reset()
+        for datasource in self.datasources:
+            datasource.reset()
         self.reset()
-
-        self.filename = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
         # camera has some initialization time
         if self.camera_record:
             self.camera.start_recording(f"{self.TELEMETRY_PATH}{self.filename}.h264")
             self.apogee_file = f"{self.TELEMETRY_PATH}{self.filename}.jpg"
 
-        self.csvfile = open(f"{self.TELEMETRY_PATH}{self.filename}.csv", "w", newline="")
-        
         fieldnames = ["time", "duration", "duration_remapped"]
-        fieldnames += self.sensor.fields
-        fieldnames += self.parachute.fields
+        for datasource in self.datasources:
+            fieldnames += datasource.fields
 
-        self.csv = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
+        self.filename = datetime.now().strftime("%Y_%m_%d_%H_%M")
+        self.csvfile = f"{self.TELEMETRY_PATH}{self.filename}.csv"
+        self.csvhandle = open(f"{self.TELEMETRY_PATH}{self.filename}.csv", "w", newline="")
+        self.csv = csv.DictWriter(self.csvhandle, fieldnames=fieldnames)
         self.csv.writeheader()
 
         if self.notes:
@@ -107,38 +108,44 @@ class Recorder(object):
             rowdata["duration"] = duration
             rowdata["duration_remapped"] = duration * self.framerate_factor
 
-            rowdata.update(self.sensor.as_dict())
-            rowdata.update(self.parachute.as_dict())
+            for datasource in self.datasources:
+                rowdata.update(datasource.as_dict())
 
-            if self.csv and not self.csvfile.closed:
+            if self.csv and not self.csvhandle.closed:
                 self.csv.writerow(rowdata)
-                self.csvfile.flush()
-
-            # for preview plot data
-            self.altitudes.append(self.sensor.altitude)
-            self.parachute_deploys.append(self.parachute.deployed)
+                self.csvhandle.flush()
     
     def plot(self):
         if self.filename:
+            plotdata = csv.DictReader(open(self.csvfile, "r", newline=""))
+            
+            columns = defaultdict(list)
+            for row in plotdata:
+                for key, value in row.items():
+                    columns[key].append(float(value))
+
+            for key, value in columns.items():
+                if key in self.plot_fields:
+                    plt.plot(columns["duration"], value, label=key)
+
             self.plot_file = f"{self.TELEMETRY_PATH}{self.filename}.png"
-            plt.plot(self.altitudes, label="Altitude")
-            plt.plot(self.parachute_deploys, label="Parachute Deploy")
             plt.title("Pi High Rockets")
             plt.savefig(self.plot_file)
+
+            logging.info("Generated plot")
 
     def stop_recording(self):
         
         self.recording = False
 
-        if self.csvfile:
-            self.csvfile.close()
+        if self.csvhandle:
+            self.csvhandle.close()
 
         if self.camera_record:
             if self.camera.recording:
                 self.camera.stop_recording()
 
         self.starttime = None
-
         self.plot()
 
         
