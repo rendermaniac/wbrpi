@@ -9,7 +9,7 @@ class Recorder(object):
 
     HD_FRAMERATE = 30.0
 
-    def __init__(self):
+    def __init__(self, sensor, parachute):
         self.recording = False
         self.camera_record = False
         
@@ -18,13 +18,16 @@ class Recorder(object):
         self.notes = None
         self.csv = None
 
+        self.sensor = sensor
+        self.parachute = parachute
+
         self.reset()
 
         self.camera = picamera.PiCamera()
         self.framerate_factor = 1.0
         self.set_camera_hd()
         
-        self.TELEMETRY_PATH = "/home/pi/"
+        self.TELEMETRY_PATH = f"/home/pi/{datetime.now().strftime('%Y_%m_%d')}"
         self.csvfile = None
         self.apogee_file = None
         self.plot_file = None
@@ -61,9 +64,9 @@ class Recorder(object):
         self.notes = notes
         logging.info(f"Set notes: {self.notes}")
 
-    def start_recording(self, sensor, parachute):
+    def start_recording(self):
         self.recording = True
-        sensor.reset()
+        self.sensor.reset()
         self.reset()
 
         self.filename = datetime.now().strftime("%Y_%m_%d_%H_%M")
@@ -76,8 +79,8 @@ class Recorder(object):
         self.csvfile = open(f"{self.TELEMETRY_PATH}{self.filename}.csv", "w", newline="")
         
         fieldnames = ["time", "duration", "duration_remapped"]
-        fieldnames += sensor.fields
-        fieldnames += parachute.fields
+        fieldnames += self.sensor.fields
+        fieldnames += self.parachute.fields
 
         self.csv = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
         self.csv.writeheader()
@@ -89,7 +92,7 @@ class Recorder(object):
 
         logging.info(f"Started recording")
 
-    def record_data(self, sensor, parachute):
+    def record_data(self):
         
         if self.recording:
 
@@ -101,16 +104,16 @@ class Recorder(object):
             rowdata["duration"] = duration
             rowdata["duration_remapped"] = duration * self.framerate_factor
 
-            rowdata.update(sensor.as_dict())
-            rowdata.update(parachute.as_dict())
+            rowdata.update(self.sensor.as_dict())
+            rowdata.update(self.parachute.as_dict())
 
             if self.csv and not self.csvfile.closed:
                 self.csv.writerow(rowdata)
                 self.csvfile.flush()
 
             # for preview plot data
-            self.altitudes.append(sensor.altitude)
-            self.parachute_deploys.append(parachute.deployed)
+            self.altitudes.append(self.sensor.altitude)
+            self.parachute_deploys.append(self.parachute.deployed)
     
     def plot(self):
         if self.filename:

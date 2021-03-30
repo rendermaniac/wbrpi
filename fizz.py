@@ -39,9 +39,9 @@ class Rocket(object):
 
     def __init__(self, simulate=None):     
         self.sensor = Sensor(simulate)
-        self.state = State()
-        self.recorder = Recorder()
-        self.parachute = Parachute()
+        self.state = State(self.sensor)
+        self.parachute = Parachute(self.state)
+        self.recorder = Recorder(self.sensor, self.parachute)
 
         self.delay = 1.0
 
@@ -102,7 +102,7 @@ class Rocket(object):
     def record(self, state):
         if state:
             self.delay = 0.1
-            self.recorder.start_recording(self.sensor, self.parachute)
+            self.recorder.start_recording()
         else:
             self.delay = 1.0
             self.recorder.stop_recording()
@@ -114,9 +114,9 @@ class Rocket(object):
         while True:
 
             if self.recorder.recording:
-                self.state.calculate(self.sensor)
-                self.parachute.check_auto_deploy(self.sensor, self.state)
-                self.recorder.record_data(self.sensor, self.parachute)
+                self.state.calculate()
+                self.parachute.check_auto_deploy()
+                self.recorder.record_data()
                 
                 if self.parachute.deployed:
                     self.recorder.take_apogee_snapshot()
