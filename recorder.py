@@ -1,3 +1,4 @@
+import os
 import logging
 from datetime import datetime
 import csv
@@ -27,7 +28,9 @@ class Recorder(object):
         self.framerate_factor = 1.0
         self.set_camera_hd()
         
-        self.TELEMETRY_PATH = f"/home/pi/{datetime.now().strftime('%Y_%m_%d')}"
+        telemetry_dir = datetime.now().strftime('%Y_%m_%d')
+        os.mkdir(telemetry_dir)
+        self.TELEMETRY_PATH = f"/home/pi/{telemetry_dir}/"
         self.csvfile = None
         self.apogee_file = None
         self.plot_file = None
