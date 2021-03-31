@@ -63,6 +63,7 @@ class Rocket(object):
         self.client.loop_start()
 
         self.client.publish("/rocket/telemetry/record", "0")
+        self.client.publish("/rocket/telemetry/notes", "")
         self.client.publish("/rocket/parachute/deploy", "0")
         self.client.publish("/rocket/parachute/auto", "1")
         self.client.publish("/rocket/camera/enable", "1")
