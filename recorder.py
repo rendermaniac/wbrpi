@@ -119,7 +119,7 @@ class Recorder(object):
     def plot(self):
         if self.filename:
             plotdata = csv.DictReader(open(self.csvfile, "r", newline=""))
-            plt.clf()
+            plt.clf() # clear plot so we don't double up
             
             columns = defaultdict(list)
             for row in plotdata:
