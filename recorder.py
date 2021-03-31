@@ -85,6 +85,7 @@ class Recorder(object):
 
         self.filename = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         self.csvfile = f"{self.TELEMETRY_PATH}{self.filename}.csv"
+        
         self.csvhandle = open(f"{self.TELEMETRY_PATH}{self.filename}.csv", "w", newline="")
         self.csv = csv.DictWriter(self.csvhandle, fieldnames=fieldnames)
         self.csv.writeheader()
@@ -118,6 +119,7 @@ class Recorder(object):
     def plot(self):
         if self.filename:
             plotdata = csv.DictReader(open(self.csvfile, "r", newline=""))
+            plt.clf()
             
             columns = defaultdict(list)
             for row in plotdata:
