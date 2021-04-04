@@ -40,7 +40,7 @@ class Rocket(object):
     def __init__(self, simulate=None):     
         self.sensor = Sensor(simulate)
         self.state = State(self.sensor)
-        self.parachute = Parachute(self.state)
+        self.parachute = Parachute()
         self.recorder = Recorder([self.sensor, self.parachute])
 
         self.delay = 1.0
@@ -109,6 +109,7 @@ class Rocket(object):
             self.recorder.stop_recording()
             self.send_image("/rocket/camera/apogee", self.recorder.apogee_file)
             self.send_image("/rocket/telemetry/plot", self.recorder.plot_file)
+            self.send_image("/rocket/telemetry/plot/accumulated", self.recorder.plot_file_accumulated)
 
     def run(self):
 
@@ -116,11 +117,15 @@ class Rocket(object):
 
             if self.recorder.recording:
                 self.state.calculate()
-                self.parachute.check_auto_deploy()
                 self.recorder.record_data()
-                
-                if self.parachute.deployed:
+
+                # auto deploy parachute
+                if self.parachute.autodeploy and not self.parachute.deployed and self.state.at_apogee():
+                    self.parachute.deploy()
                     self.recorder.take_apogee_snapshot()
+                    self.client.publish("/rocket/parachute/deploy", "1")
+                    logging.info(f"auto deploying parachute at height {self.sensor.altitude}")
+                
 
             logging.debug(f"Reading altitude {self.sensor.altitude} max altitude: {self.sensor.altitude_max}")
             self.client.publish("/rocket/telemetry/altitude", self.sensor.altitude)

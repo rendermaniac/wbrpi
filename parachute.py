@@ -4,15 +4,13 @@ import pigpio
 
 class Parachute(object):
 
-    def __init__(self, state):
+    def __init__(self):
         self.deployed = False
         self.autodeploy = True
 
         self.SERVO_PIN = 13
         self.DEPLOY_PULSEWIDTH = 1500
         self.RESET_PULSEWIDTH = 500
-
-        self.state = state
 
         self.pi = pigpio.pi()
         self.pi.set_servo_pulsewidth(self.SERVO_PIN, self.RESET_PULSEWIDTH)
@@ -36,11 +34,6 @@ class Parachute(object):
         self.pi.set_servo_pulsewidth(self.SERVO_PIN, self.RESET_PULSEWIDTH)
         self.deployed = False
         logging.info(f"Reset parachute")
-
-    def check_auto_deploy(self):
-        if self.autodeploy and not self.deployed and self.state.at_apogee():
-            self.deploy()
-            logging.info(f"auto deploying parachute at height {self.state.sensor.altitude}")
 
     def as_dict(self):
         return {"deployed" : int(self.deployed)}
