@@ -29,7 +29,7 @@ class Recorder(object):
             self.set_camera_hd()
         except:
             self.camera = None
-        
+
         self.todays_date = datetime.now().strftime('%Y_%m_%d')
         self.TELEMETRY_BASE = "/home/pi/"
         self.TELEMETRY_PATH = f"{self.TELEMETRY_BASE}{self.todays_date}/"
@@ -39,8 +39,8 @@ class Recorder(object):
         self.csvfile = None
         self.csvhandle = None
         self.apogee_file = None
-        self.plot_file = None
 
+        self.plot_file = None
         self.plot_fields = ["altitude", "deployed"]
 
     def reset(self):
@@ -114,8 +114,10 @@ class Recorder(object):
             rowdata["time"] = datetime.timestamp(now)
 
             duration = (now - self.starttime).total_seconds()
+            remapped_duration = duration * self.framerate_factor
+
             rowdata["duration"] = duration
-            rowdata["duration_remapped"] = duration * self.framerate_factor
+            rowdata["duration_remapped"] = remapped_duration
 
             for datasource in self.datasources:
                 rowdata.update(datasource.as_dict())
@@ -123,6 +125,10 @@ class Recorder(object):
             if self.csv and not self.csvhandle.closed:
                 self.csv.writerow(rowdata)
                 self.csvhandle.flush()
+
+            if self.camera and self.camera_record:
+                if self.camera.recording:
+                    self.camera.annotate_text = str(duration)
     
     def plot(self, fig, outfile, clear=True):
         if self.filename:
