@@ -131,6 +131,16 @@ class Rocket(object):
             self.client.publish("/rocket/telemetry/altitude", self.sensor.altitude)
             self.client.publish("/rocket/telemetry/altitude/max", self.sensor.altitude_max)
 
+            acceleration = self.sensor.acceleration
+            self.client.publish("/rocket/telemetry/acceleration/x", acceleration[0])
+            self.client.publish("/rocket/telemetry/acceleration/y", acceleration[1])
+            self.client.publish("/rocket/telemetry/acceleration/z", acceleration[2])
+
+            rotation = self.sensor.rotation
+            self.client.publish("/rocket/telemetry/rotation/x", rotation[0])
+            self.client.publish("/rocket/telemetry/rotation/y", rotation[1])
+            self.client.publish("/rocket/telemetry/rotation/z", rotation[2])
+
             time.sleep(self.delay)
 
 if __name__ == '__main__':

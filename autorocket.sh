@@ -6,7 +6,11 @@
 sudo apt install python3 python3-pip git mosquitto mosquitto-clients pigpio python3-picamera python3-matplotlib -y -qq
 
 # install python3 dependencies
-sudo pip3 install paho-mqtt pigpio adafruit-circuitpython-bmp280 psutil
+sudo pip3 install paho-mqtt pigpio adafruit-circuitpython-bmp280 psutil adafruit-circuitpython-l3gd20 lsm303d
+
+#git clone https://github.com/BadTigrou/Adafruit_CircuitPython_BMP180.git
+#cd Adafruit_CircuitPython_BMP180
+#sudo python3 setup.py install
 
 # enable services on startup
 sudo systemctl enable mosquitto

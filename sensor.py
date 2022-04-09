@@ -2,7 +2,9 @@ import logging
 
 import busio
 import board
-import adafruit_bmp280
+import adafruit_l3gd20
+import lsm303d
+import Adafruit_BMP.BMP085 as BMP085
 import psutil
 import csv
 
@@ -10,9 +12,15 @@ class Sensor(object):
 
     def __init__(self, simulatefile=None):
         i2c = busio.I2C(board.SCL, board.SDA)
-        self.bmp280 = adafruit_bmp280.Adafruit_BMP280_I2C(i2c, address=0x76)
+        self.accel_sensor = lsm303d.LSM303D(0x1e)
+        self.gyro_sensor = adafruit_l3gd20.L3GD20_I2C(i2c, address=0x6a)
+        self.pressure_sensor = BMP085.BMP085()
 
-        self.fields = ["altitude", "temperature", "pressure", "cpu", "memory"]
+        self.fields = [ "accelx", "accely", "accelz",
+                        "magnetx", "magnety", "magnetz",
+                        "rotatex", "rotatey", "rotatez",
+                        "altitude", "temperature", "pressure",
+                        "cpu", "memory"]
 
         self.simulatefile = simulatefile
         self.simhandle = None
@@ -35,11 +43,11 @@ class Sensor(object):
         self.altitude_diff = 0.0
 
     def set_sealevel(self):
-        self.bmp280.sea_level_pressure = self.bmp280.pressure
+        self.sea_level_pressure = self.pressure_sensor.read_pressure()
 
     @property
     def altitude(self):
-        alt = self.bmp280.altitude
+        alt = self.pressure_sensor.read_altitude( sealevel_pa=self.sea_level_pressure)
 
         if self.simdata:
             try:
@@ -55,12 +63,24 @@ class Sensor(object):
         return alt
 
     @property
+    def acceleration(self):
+        return self.accel_sensor.accelerometer()
+
+    @property
+    def magnetic_field(self):
+        return self.accel_sensor.magnetometer()
+
+    @property
+    def rotation(self):
+        return self.gyro_sensor.gyro
+
+    @property
     def temperature(self):
-        return self.bmp280.temperature
+        return self.pressure_sensor.read_temperature()
 
     @property
     def pressure(self):
-        return self.bmp280.pressure
+        return self.pressure_sensor.read_pressure()
 
     @property
     def cpu(self):
@@ -72,6 +92,18 @@ class Sensor(object):
 
     def as_dict(self):
         rowdata = {}
+        accel = self.acceleration
+        rowdata["acceleration_x"] = accel[0]
+        rowdata["acceleration_y"] = accel[1]
+        rowdata["acceleration_x"] = accel[2]
+        magnet = self.magnetic_field
+        rowdata["magnetic_field_x"] = magnet[0]
+        rowdata["magnetic_field_y"] = magnet[1]
+        rowdata["magnetic_field_z"] = magnet[2]
+        rotate = self.rotation
+        rowdata["rotation_x"] = rotate[0]
+        rowdata["rotation_y"] = rotate[1]
+        rowdata["rotation_z"] = rotate[2]
         rowdata["altitude"] = self.altitude
         rowdata["temperature"] = self.temperature
         rowdata["pressure"] = self.pressure
